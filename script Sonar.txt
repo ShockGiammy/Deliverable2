@@ -1,0 +1,1 @@
+sonar-scanner.bat -D"sonar.organization=shockgiammy" -D"sonar.projectKey=ShockGiammy_Deliverable2" -D"sonar.sources=." -D"sonar.host.url=https://sonarcloud.io"
