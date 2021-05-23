@@ -65,7 +65,7 @@ public class GetAllFiles {
 		
 		if (versionInfo != null && tickets != null) {
 			for (var i = 0; i < versionInfo.size(); i++) {
-				for (int j = 0; j < tickets.size(); j ++) {
+				for (var j = 0; j < tickets.size(); j ++) {
 					versionInfo.get(i).setBuggyClasses(tickets.get(j));
 				}
 			}

@@ -30,12 +30,12 @@ public class GetReleaseInfo {
 		Integer i;
 		String url = "https://issues.apache.org/jira/rest/api/2/project/" + projName;
 		JSONObject json = Utilities.readJsonFromUrl(url);
-		JSONArray versions = json.getJSONArray("versions");
+		var versions = json.getJSONArray("versions");
 		releaseNames = new HashMap<>();
 		releaseID = new HashMap<> ();
 		for (i = 0; i < versions.length(); i++ ) {
-			String name = "";
-			String id = "";
+			var name = "";
+			var id = "";
 			if(versions.getJSONObject(i).has("releaseDate")) {
 				if (versions.getJSONObject(i).has("name"))
 					name = versions.getJSONObject(i).get("name").toString();
@@ -47,11 +47,11 @@ public class GetReleaseInfo {
 		// order releases by date
 		Collections.sort(releases, (LocalDateTime o1, LocalDateTime o2) -> o1.compareTo(o2));
 		
-		VersionInfo firstVersion = new VersionInfo(releaseID.get(releases.get(0)), releaseNames.get(releases.get(0)), releases.get(0), null, proportion);	
+		var firstVersion = new VersionInfo(releaseID.get(releases.get(0)), releaseNames.get(releases.get(0)), releases.get(0), null, proportion);	
 		versionInfo.add(firstVersion);
 		versionList.add(releaseNames.get(releases.get(0)));
 		for ( i = 1; i < releases.size(); i++) {
-			VersionInfo version = new VersionInfo(releaseID.get(releases.get(i)), releaseNames.get(releases.get(i)), releases.get(i), versionInfo.get(i-1), proportion);	
+			var version = new VersionInfo(releaseID.get(releases.get(i)), releaseNames.get(releases.get(i)), releases.get(i), versionInfo.get(i-1), proportion);	
 			versionInfo.add(version);
 			versionList.add(releaseNames.get(releases.get(i)));
 		}
@@ -60,7 +60,7 @@ public class GetReleaseInfo {
  
 	
 	public void addRelease(String strDate, String name, String id) {
-		LocalDate date = LocalDate.parse(strDate);
+		var date = LocalDate.parse(strDate);
 		LocalDateTime dateTime = date.atStartOfDay();
 		if (!releases.contains(dateTime))
 			releases.add(dateTime);

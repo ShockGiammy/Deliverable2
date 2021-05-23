@@ -35,31 +35,31 @@ public class RetrieveTicketsID {
          for (; i < total && i < j; i++) {
             //Iterate through each bug
         	 
-        	 String key = issues.getJSONObject(i%1000).get("key").toString();
+        	 var key = issues.getJSONObject(i%1000).get("key").toString();
         	 Object fields = issues.getJSONObject(i%1000).get("fields");
-        	 String fixVersionJson = ((JSONObject) fields).get("fixVersions").toString();
+        	 var fixVersionJson = ((JSONObject) fields).get("fixVersions").toString();
         	 
         	 String fixVersion = null;
         	 if (fixVersionJson.length() > 3) {
         		 fixVersion = fixVersionJson.split("\"name\":\"")[1].split("\",\"")[0];
         	 }
         	 
-        	 String affectedVersionJson = ((JSONObject) fields).get("versions").toString();
+        	 var affectedVersionJson = ((JSONObject) fields).get("versions").toString();
         	 String affectedVersion = null;
         	 List<String> affectedVersionList = new ArrayList<>();
         	 String[] splittedString;
         	 if (affectedVersionJson.length() > 3) {
         		 splittedString = affectedVersionJson.split("\"name\":\"");
-        		 for (int len = 1; len < splittedString.length; len++) { 			 
+        		 for (var len = 1; len < splittedString.length; len++) { 			 
         			 affectedVersion = splittedString[len].split("\",\"")[0];
         			 affectedVersionList.add(affectedVersion);
         		 }
         	 }
-        	 String openingDate = ((JSONObject) fields).get("created").toString().substring(0, 10);
-        	 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd",Locale.US);
-        	 Date date = formatter.parse(openingDate);
+        	 var openingDate = ((JSONObject) fields).get("created").toString().substring(0, 10);
+        	 var formatter = new SimpleDateFormat("yyyy-MM-dd",Locale.US);
+        	 var date = formatter.parse(openingDate);
         	 
-        	 JiraTicket ticket = new JiraTicket(key, fixVersion, affectedVersionList, date);
+        	 var ticket = new JiraTicket(key, fixVersion, affectedVersionList, date);
         	 tickets.add(ticket);
          }  
       } while (i < total);
