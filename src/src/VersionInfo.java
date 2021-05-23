@@ -129,7 +129,7 @@ public class VersionInfo {
 		String toBeModified = javaClass.split(Pattern.quote("{"))[1].split(Pattern.quote("}"))[0];
 		
 		String[] splittedName = javaClass.split(Pattern.quote("{"))[1].split(Pattern.quote("}"));	
-		String lastPart = "";
+		var lastPart = "";
 		if (splittedName.length > 1)  {
 			lastPart = javaClass.split(Pattern.quote("{"))[1].split(Pattern.quote("}"))[1];
 		}
@@ -150,13 +150,13 @@ public class VersionInfo {
 		String toBeModified = javaClass.split(Pattern.quote("{"))[1].split(Pattern.quote("}"))[0];
 		
 		String[] splittedName = javaClass.split(Pattern.quote("{"))[1].split(Pattern.quote("}"));	
-		String lastPart = "";
+		var lastPart = "";
 		if (splittedName.length > 1)  {
 			lastPart = javaClass.split(Pattern.quote("{"))[1].split(Pattern.quote("}"))[1];
 		}
 		
 		String[] mediumPartRaw = toBeModified.split(Pattern.quote("=>"));
-		String mediumPart = "";
+		var mediumPart = "";
 		if (mediumPartRaw.length > 1)  {
 			mediumPart = mediumPartRaw[1];
 		}
@@ -168,7 +168,7 @@ public class VersionInfo {
 	}
 	
 	public List<String> getJavaClasses() {
-		for (int i = 0; i < javaClasses.size(); i ++) {
+		for (var i = 0; i < javaClasses.size(); i ++) {
 			if (this.getSize(javaClasses.get(i)) <= 5 && (this.getRevision(javaClasses.get(i)) <= 0 || this.getlocTouched(javaClasses.get(i)) <= 0)) {
 				javaClasses.remove(javaClasses.get(i));
 			}

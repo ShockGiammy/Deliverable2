@@ -28,7 +28,7 @@ public class Utilities {
 	private static Logger logger = Logger.getLogger(Utilities.class.getName());
 
 	private static String readAll(Reader rd) throws IOException {
-		StringBuilder sb = new StringBuilder();
+		var sb = new StringBuilder();
 	    int cp;
 	    while ((cp = rd.read()) != -1) {
 	    	sb.append((char) cp);
@@ -39,7 +39,7 @@ public class Utilities {
 	public static JSONArray readJsonArrayFromUrl(String url) throws IOException, JSONException {
 		InputStream is = new URL(url).openStream();
 		try (
-				BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+				var rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 				) {
 			String jsonText = readAll(rd);
 			return new JSONArray(jsonText);
@@ -51,7 +51,7 @@ public class Utilities {
 	public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
 		InputStream is = new URL(url).openStream();
 		try (
-				BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+				var rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 			) {
 			String jsonText = readAll(rd);
 			return new JSONObject(jsonText);
@@ -61,8 +61,8 @@ public class Utilities {
 	}
 	
 	public static void writeFile(String projName, List<VersionInfo> versionInfo) {
-		String delimiter = ";";
-		String user = "Gian Marco/";
+		var delimiter = ";";
+		var user = "Gian Marco/";
 		String path = "C:/Users/" +  user + "Desktop/" + projName+ "_dataset.csv";
 		File file;
 		file = new File(path);
@@ -78,7 +78,7 @@ public class Utilities {
 				e.printStackTrace();
 		}
 		try (
-				BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+				var writer = new BufferedWriter(new FileWriter(file));
 				) {
 			writer.write("Version name" + delimiter + "File name" + delimiter
 					+ "Size" + delimiter 
@@ -93,12 +93,12 @@ public class Utilities {
 					+ "AVG_Churn" + delimiter 
 					+ "bugginess" + "\n");
 			
-			for (int i = 0; i < versionInfo.size(); i++) {
+			for (var i = 0; i < versionInfo.size(); i++) {
 				List<String> classes = versionInfo.get(i).getJavaClasses();
-				for (int j = 0; j < classes.size(); j++) {
+				for (var j = 0; j < classes.size(); j++) {
 				
-					int avgLoc = 0;
-					int avgChurn = 0;
+					var avgLoc = 0;
+					var avgChurn = 0;
 					if (versionInfo.get(i).getRevision(classes.get(j)) != 0 ) {
 						avgLoc = Math.round(versionInfo.get(i).getlocAdded(classes.get(j))/(float)versionInfo.get(i).getRevision(classes.get(j)));
 						avgChurn = Math.round(versionInfo.get(i).getChurn(classes.get(j))/(float)versionInfo.get(i).getRevision(classes.get(j)));
@@ -129,7 +129,7 @@ public class Utilities {
 	static boolean deleteDir(File file) {
 		if (file.isDirectory()) {
 			String[] contenuto = file.list();
-			for (int i=0; i<contenuto.length; i++) {
+			for (var i=0; i<contenuto.length; i++) {
 				boolean success = deleteDir(new File(file, contenuto[i]));
 				if (!success) { 
 					return false; 
@@ -140,9 +140,9 @@ public class Utilities {
 	}
 	
 	public static void runCommand(String command, Process p) throws IOException {
-		BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		var input = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String line;
-        StringBuilder text = new StringBuilder();
+        var text = new StringBuilder();
         text.append(command + "\n");
         while ((line = input.readLine()) != null) {
             text.append(line + "\n");

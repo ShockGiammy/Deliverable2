@@ -21,7 +21,7 @@ public class GetAllFiles {
 
 	public static void main(String[] args) throws IOException {
 		
-		String projName ="AVRO";
+		var projName ="AVRO";
 		
 		List<VersionInfo> versionInfo = null;
 		List<JiraTicket> tickets = null;
@@ -33,7 +33,7 @@ public class GetAllFiles {
 			e.printStackTrace();
 		}
 		
-		ProportionCalculator proportion = new ProportionCalculator(versionsList);
+		var proportion = new ProportionCalculator(versionsList);
 		
 		try {
 			versionInfo = new GetReleaseInfo().getReleaseInfo(projName, proportion, versionsList);
@@ -58,13 +58,13 @@ public class GetAllFiles {
 		}
 		
 		if (versionInfo != null) {
-			for (int i = 1; i < versionInfo.size(); i++) {
+			for (var i = 1; i < versionInfo.size(); i++) {
 				versionInfo.get(i).updateSize();
 			}
 		}
 		
 		if (versionInfo != null && tickets != null) {
-			for (int i = 0; i < versionInfo.size(); i++) {
+			for (var i = 0; i < versionInfo.size(); i++) {
 				for (int j = 0; j < tickets.size(); j ++) {
 					versionInfo.get(i).setBuggyClasses(tickets.get(j));
 				}
@@ -76,14 +76,14 @@ public class GetAllFiles {
 	}
 	
 	public static void associateOpeningVersion(String projName, List<VersionInfo> versionInfo, List<JiraTicket> tickets) {
-		for (int i = 0; i < tickets.size(); i++) {
+		for (var i = 0; i < tickets.size(); i++) {
 			try {
 				retrieveCommitsID(projName, tickets.get(i));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			if (versionInfo != null) {
-				for (int j = 0; j < versionInfo.size()-1; j++) {
+				for (var j = 0; j < versionInfo.size()-1; j++) {
 					if (versionInfo.get(j).getVersionDate().before(tickets.get(i).getOpeningDate()) && 
 						versionInfo.get(j+1).getVersionDate().after(tickets.get(i).getOpeningDate())) {
 						tickets.get(i).setOpeningVersion(versionInfo.get(j).getVersionName());
@@ -100,7 +100,7 @@ public class GetAllFiles {
 	public static void cloneProject(String projName) throws IOException {
 		String url = "https://github.com/apache/" + projName;
 		String command = "git clone " + url;
-		ProcessBuilder builder = new ProcessBuilder(shell, "/c", command);
+		var builder = new ProcessBuilder(shell, "/c", command);
 		builder.redirectErrorStream(true);
 		Process p = builder.start();
 		Utilities.runCommand(command, p);
@@ -110,13 +110,13 @@ public class GetAllFiles {
 
 		String ticket = jiraTicket.getTicketName();
 		String command = "cd " + dirName + " && git log --grep=" + ticket + " --pretty=\"short\" --name-only";
-		ProcessBuilder builder = new ProcessBuilder(shell, "/c", command);
+		var builder = new ProcessBuilder(shell, "/c", command);
 		builder.redirectErrorStream(true);
 		Process p = builder.start();
 		
-		BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		var input = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String line;
-        StringBuilder text = new StringBuilder();
+        var text = new StringBuilder();
         text.append(command + "\n");
         while ((line = input.readLine()) != null) {
             text.append(line + "\n");
@@ -130,14 +130,14 @@ public class GetAllFiles {
 	public static void locAnalysis(String dirName, List<VersionInfo> versions) throws IOException, ParseException {
 
 		String command = "cd " + dirName + " && git log --stat=260 --reverse";
-		ProcessBuilder builder = new ProcessBuilder(shell, "/c", command);
+		var builder = new ProcessBuilder(shell, "/c", command);
 		builder.redirectErrorStream(true);
 		Process p = builder.start();
-		SimpleDateFormat formatter = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy",Locale.US); 
+		var formatter = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy",Locale.US); 
 
-		BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		var input = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String line;
-        StringBuilder text = new StringBuilder();
+        var text = new StringBuilder();
         text.append(command + "\n");
 		Date date = null;
 		String author = null;
@@ -152,7 +152,7 @@ public class GetAllFiles {
             }
            	else if (line.contains(".java") && line.contains(" | ")) {
            		String javaClass = line.split(Pattern.quote(" | "))[0].replace(" ", "");
-           		int locTouched = Integer.parseInt(line.split(Pattern.quote(" | "))[1].split(Pattern.quote("+"))[0].replace(" ", "").replace("-", ""));
+           		var locTouched = Integer.parseInt(line.split(Pattern.quote(" | "))[1].split(Pattern.quote("+"))[0].replace(" ", "").replace("-", ""));
            		
            		
            		String toBeCount = line.split(Pattern.quote(" | "))[1];
@@ -181,7 +181,7 @@ public class GetAllFiles {
 		else {
 		
 	
-			for (int i = 0; i < versions.size()-1; i++) {
+			for (var i = 0; i < versions.size()-1; i++) {
 		
 				if (versions.get(i).getVersionDate().before(date) && versions.get(i+1).getVersionDate().after(date)) {
 				
