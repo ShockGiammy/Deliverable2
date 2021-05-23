@@ -10,9 +10,14 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -126,18 +131,15 @@ public class Utilities {
 		}
 	}
 	
-	static boolean deleteDir(File file) {
-		if (file.isDirectory()) {
-			String[] contenuto = file.list();
-			for (var i=0; i<contenuto.length; i++) {
-				boolean success = deleteDir(new File(file, contenuto[i]));
-				if (!success) { 
-					return false; 
-				}
-			}
-	    }
-	    return file.delete();
+	static void deleteDir(File directoryToBeDeleted) throws IOException {
+		var rootPath = Paths.get(directoryToBeDeleted.getAbsolutePath());
+		try (Stream<Path> walk = Files.walk(rootPath)) {
+		    walk.sorted(Comparator.reverseOrder())
+		        .map(Path::toFile)
+		        .forEach(File::delete);
+		}
 	}
+	
 	
 	public static void runCommand(String command, Process p) throws IOException {
 		var input = new BufferedReader(new InputStreamReader(p.getInputStream()));
