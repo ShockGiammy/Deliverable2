@@ -11,9 +11,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import src.Utilities;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.RandomForest;
 import weka.classifiers.bayes.NaiveBayes;
@@ -24,8 +23,6 @@ import weka.classifiers.rules.ZeroR;
 
 
 public class TestWeka{
-	
-	private static Logger logger = Logger.getLogger(TestWeka.class.getName());
 	
 	static List<Evaluation> randomForestRuns = new ArrayList<>();
 	static List<Evaluation> naiveBayesRuns = new ArrayList<>();
@@ -108,22 +105,13 @@ public class TestWeka{
 
 	private static void writeStatisticsOnFile(String projName) {
 		
+		
+		var delimiter = ",";
 		var user = "Gian Marco/";
 		String path = "C:/Users/" +  user + "Desktop/Falessi Deliverables/" + projName+ "_results.csv";
 		var file = new File(path);
-		if (file.exists())
-			logger.log(Level.INFO, "Il file {0} esiste", path);
-		else
-			try {
-				if (file.createNewFile())
-					logger.log(Level.INFO, "Il file {0} è stato creato", path);
-				else
-					logger.log(Level.INFO, "Il file {0} non può essere creato", path);
-			} catch (IOException e) {
-				e.printStackTrace();
-		}
+		Utilities.createFile(file, path);
 		
-		var delimiter = ",";
 		try (
 				var writer = new BufferedWriter(new FileWriter(file));
 				) {

@@ -71,17 +71,7 @@ public class Utilities {
 		String path = "C:/Users/" +  user + "Desktop/Falessi Deliverables/dataset/" + projName+ "_dataset.csv";
 		File file;
 		file = new File(path);
-		if (file.exists())
-			logger.log(Level.INFO, "Il file {0} esiste", path);
-		else
-			try {
-				if (file.createNewFile())
-					logger.log(Level.INFO, "Il file {0} è stato creato", path);
-				else
-					logger.log(Level.INFO, "Il file {0} non può essere creato", path);
-			} catch (IOException e) {
-				e.printStackTrace();
-		}
+		createFile(file, path);
 		try (
 				var writer = new BufferedWriter(new FileWriter(file));
 				) {
@@ -150,5 +140,19 @@ public class Utilities {
             text.append(line + "\n");
         }
         logger.log(Level.INFO, "Line: {0}", text);
+	}
+	
+	public static void createFile(File file, String path) {
+		if (file.exists())
+			logger.log(Level.INFO, "Il file {0} esiste", path);
+		else
+			try {
+				if (file.createNewFile())
+					logger.log(Level.INFO, "Il file {0} è stato creato", path);
+				else
+					logger.log(Level.INFO, "Il file {0} non può essere creato", path);
+			} catch (IOException e) {
+				e.printStackTrace();
+		}
 	}
 }
