@@ -3,11 +3,16 @@ package weka;
 import weka.core.Instances;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.RandomForest;
@@ -15,14 +20,21 @@ import weka.classifiers.bayes.NaiveBayes;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.classifiers.lazy.IBk;
+import weka.classifiers.rules.ZeroR;
 
 
 public class TestWeka{
 	
-	public static void main(String args[]) throws Exception {
+	private static Logger logger = Logger.getLogger(TestWeka.class.getName());
+	
+	static List<Evaluation> randomForestRuns = new ArrayList<>();
+	static List<Evaluation> naiveBayesRuns = new ArrayList<>();
+	static List<Evaluation> ibkRuns = new ArrayList<>();
+	static int numberParts = 10;
+	
+	public static void main(String[] args) throws Exception {
 		
-		var numberParts = 10;
-		var projName = "AVRO"; //"BOOKKEEPER";
+		var projName = "BOOKKEEPER";
 		var user = "Gian Marco/";
 		String basePath = "C:/Users/" +  user + "Desktop/Falessi Deliverables/dataset/" + projName;
 		
@@ -90,8 +102,65 @@ public class TestWeka{
 			
 			calculateStatistics(trainingArff, testingArff);
         }
+		
+		writeStatisticsOnFile(projName);
 	}
 
+	private static void writeStatisticsOnFile(String projName) {
+		
+		var delimiter = ",";
+		var user = "Gian Marco/";
+		String path = "C:/Users/" +  user + "Desktop/Falessi Deliverables/" + projName+ "_results.csv";
+		File file;
+		file = new File(path);
+		if (file.exists())
+			logger.log(Level.INFO, "Il file {0} esiste", path);
+		else
+			try {
+				if (file.createNewFile())
+					logger.log(Level.INFO, "Il file {0} è stato creato", path);
+				else
+					logger.log(Level.INFO, "Il file {0} non può essere creato", path);
+			} catch (IOException e) {
+				e.printStackTrace();
+		}
+		try (
+				var writer = new BufferedWriter(new FileWriter(file));
+				) {
+				writer.write("Dataset" + delimiter + "#TrainingRelease" + delimiter
+					+ "Classifier" + delimiter 
+					+ "Precision" + delimiter
+					+ "Recall" + delimiter
+					+ "AUC" + delimiter
+					+ "Kappa" + "\n");
+					
+			for (var i = 0; i < numberParts-1; i++) {
+					writer.write(projName + delimiter + (i+1) + delimiter +
+						"RandomForest" + delimiter +
+						randomForestRuns.get(i).precision(0) + delimiter +
+						randomForestRuns.get(i).recall(0) + delimiter +
+						randomForestRuns.get(i).areaUnderPRC(0) + delimiter +
+						randomForestRuns.get(i).kappa() + delimiter + "\n");
+					writer.write(projName + delimiter + (i+1) + delimiter +
+						"NaiveBayes" + delimiter +
+						naiveBayesRuns.get(i).precision(0) + delimiter +
+						naiveBayesRuns.get(i).recall(0) + delimiter +
+						naiveBayesRuns.get(i).areaUnderPRC(0) + delimiter +
+						naiveBayesRuns.get(i).kappa() + delimiter + "\n");
+					writer.write(projName + delimiter + (i+1) + delimiter +
+						"IBk" + delimiter +
+						ibkRuns.get(i).precision(0) + delimiter +
+						ibkRuns.get(i).recall(0) + delimiter +
+						ibkRuns.get(i).areaUnderPRC(0) + delimiter +
+						ibkRuns.get(i).kappa() + delimiter + "\n");
+			
+			}
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	
 	private static void calculateStatistics(String trainingPath, String testingPath) throws Exception {
 		
@@ -120,31 +189,22 @@ public class TestWeka{
 		randomForest.buildClassifier(training);
 		var evalRandomForest = new Evaluation(testing);	
 		evalRandomForest.evaluateModel(randomForest, testing);
+		randomForestRuns.add(evalRandomForest);
+		
 		
 		naiveBayes.buildClassifier(training);
 		var evalNaiveBayes = new Evaluation(testing);	
 		evalNaiveBayes.evaluateModel(naiveBayes, testing); 
+		naiveBayesRuns.add(evalNaiveBayes);
 		
 		ibk.buildClassifier(training);
 		var evalIBk = new Evaluation(testing);	
 		evalIBk.evaluateModel(ibk, testing);
-			
-		System.out.println("RandomForest: \n");
-		System.out.println("Precision = "+evalRandomForest.precision(0));
-		System.out.println("Recall = "+evalRandomForest.recall(0));
-		System.out.println("AUC = "+evalRandomForest.areaUnderPRC(0));
-		System.out.println("kappa = "+evalRandomForest.kappa());
+		ibkRuns.add(evalIBk);
 		
-		System.out.println("NaiveBayes: \n");
-		System.out.println("Precision = "+evalNaiveBayes.precision(0));
-		System.out.println("Recall = "+evalNaiveBayes.recall(0));
-		System.out.println("AUC = "+evalNaiveBayes.areaUnderPRC(0));
-		System.out.println("kappa = "+evalNaiveBayes.kappa());
-		
-		System.out.println("IBk: \n");
-		System.out.println("Precision = "+evalIBk.precision(0));
-		System.out.println("Recall = "+evalIBk.recall(0));
-		System.out.println("AUC = "+evalIBk.areaUnderPRC(0));
-		System.out.println("kappa = "+evalIBk.kappa());
+		var zeroR = new ZeroR();
+		zeroR.buildClassifier(training);
+		var evalZeroR = new Evaluation(testing);	
+		evalZeroR.evaluateModel(zeroR, testing);
 	}
 }

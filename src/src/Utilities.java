@@ -98,21 +98,6 @@ public class Utilities {
 					+ "AVG_Churn" + delimiter 
 					+ "bugginess" + "\n");
 					
-			/*writer.write("@RELATION iris\n\n" +
-			   "@ATTRIBUTE Version name  STRING\n" +
-			   "@ATTRIBUTE File name   STRING\n" +
-			   "@ATTRIBUTE Size   NUMERIC\n" +
-			   "@ATTRIBUTE NR   NUMERIC\n" +
-			   "@ATTRIBUTE NAuth   NUMERIC\n" +
-			   "@ATTRIBUTE LOCTouched   NUMERIC\n" +
-			   "@ATTRIBUTE LOCAdded   NUMERIC\n" +
-			   "@ATTRIBUTE MAX_LOC_Added   NUMERIC\n" +
-			   "@ATTRIBUTE AVG_LOC_Added   NUMERIC\n" +
-			   "@ATTRIBUTE Churn   NUMERIC\n" +
-			   "@ATTRIBUTE MAX_Churn   NUMERIC\n" +
-			   "@ATTRIBUTE AVG_Churn   NUMERIC\n" +
-			   "@ATTRIBUTE bugginess     {YES,NO}"); */
-			
 			for (var i = 0; i < versionInfo.size(); i++) {
 				List<String> classes = versionInfo.get(i).getJavaClasses();
 				for (var j = 0; j < classes.size(); j++) {

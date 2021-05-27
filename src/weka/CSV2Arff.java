@@ -1,6 +1,7 @@
 package weka;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
@@ -17,14 +18,12 @@ public class CSV2Arff {
 
 	  /**
 	   * takes 2 arguments:
-	   * - CSV input file
-	   * - ARFF output file
-	 * @param file 
-	 * @param fileArff 
-	 * @return 
-	 * @throws Exception 
+	   * @param file 
+	   * @param fileArff 
+	  
+	   * @throws IOException 
 	   */
-	  public static void convertCsv2Arff(File file, File fileArff) throws Exception {
+	  public static void convertCsv2Arff(File file, File fileArff) throws IOException {
 
 	    // load CSV
 	    var loader = new CSVLoader();

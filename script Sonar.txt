@@ -1,2 +1,46 @@
 Non serve più
 sonar-scanner.bat -D"sonar.organization=shockgiammy" -D"sonar.projectKey=ShockGiammy_Deliverable2" -D"sonar.sources=." -D"sonar.host.url=https://sonarcloud.io"
+
+
+
+			/*writer.write("@RELATION iris\n\n" +
+			   "@ATTRIBUTE Version name  STRING\n" +
+			   "@ATTRIBUTE File name   STRING\n" +
+			   "@ATTRIBUTE Size   NUMERIC\n" +
+			   "@ATTRIBUTE NR   NUMERIC\n" +
+			   "@ATTRIBUTE NAuth   NUMERIC\n" +
+			   "@ATTRIBUTE LOCTouched   NUMERIC\n" +
+			   "@ATTRIBUTE LOCAdded   NUMERIC\n" +
+			   "@ATTRIBUTE MAX_LOC_Added   NUMERIC\n" +
+			   "@ATTRIBUTE AVG_LOC_Added   NUMERIC\n" +
+			   "@ATTRIBUTE Churn   NUMERIC\n" +
+			   "@ATTRIBUTE MAX_Churn   NUMERIC\n" +
+			   "@ATTRIBUTE AVG_Churn   NUMERIC\n" +
+			   "@ATTRIBUTE bugginess     {YES,NO}"); */
+			
+			
+			
+						
+		System.out.println("\nRandomForest:");
+		System.out.println("Precision = "+evalRandomForest.precision(0));
+		System.out.println("Recall = "+evalRandomForest.recall(0));
+		System.out.println("AUC = "+evalRandomForest.areaUnderPRC(0));
+		System.out.println("kappa = "+evalRandomForest.kappa());
+		
+		System.out.println("\nNaiveBayes:");
+		System.out.println("Precision = "+evalNaiveBayes.precision(0));
+		System.out.println("Recall = "+evalNaiveBayes.recall(0));
+		System.out.println("AUC = "+evalNaiveBayes.areaUnderPRC(0));
+		System.out.println("kappa = "+evalNaiveBayes.kappa());
+		
+		System.out.println("\nIBk:");
+		System.out.println("Precision = "+evalIBk.precision(0));
+		System.out.println("Recall = "+evalIBk.recall(0));
+		System.out.println("AUC = "+evalIBk.areaUnderPRC(0));
+		System.out.println("kappa = "+evalIBk.kappa());
+		
+		System.out.println("\nZeroR:");
+		System.out.println("Precision = "+evalZeroR.precision(0));
+		System.out.println("Recall = "+evalZeroR.recall(0));
+		System.out.println("AUC = "+evalZeroR.areaUnderPRC(0));
+		System.out.println("kappa = "+evalZeroR.kappa());

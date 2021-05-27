@@ -21,7 +21,7 @@ public class GetAllFiles {
 
 	public static void main(String[] args) throws IOException {
 		
-		var projName ="AVRO";  //BOOKKEEPER
+		var projName ="BOOKKEEPER";  //BOOKKEEPER
 		
 		List<VersionInfo> versionInfo = null;
 		List<JiraTicket> tickets = null;
