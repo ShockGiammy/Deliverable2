@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -155,4 +157,16 @@ public class Utilities {
 				e.printStackTrace();
 		}
 	}
+	
+    public static double roundDouble(double d, int places) {
+    	 
+    	if (!Double.isNaN(d)) {
+    		var bigDecimal = new BigDecimal(Double.toString(d));
+    		bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);
+    		return bigDecimal.doubleValue();
+    	}
+    	else {
+    		return d;
+    	}
+    }
 }

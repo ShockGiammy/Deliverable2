@@ -125,22 +125,22 @@ public class TestWeka{
 			for (var i = 0; i < numberParts-1; i++) {
 					writer.write(projName + delimiter + (i+1) + delimiter +
 						"RandomForest" + delimiter +
-						randomForestRuns.get(i).precision(0) + delimiter +
-						randomForestRuns.get(i).recall(0) + delimiter +
-						randomForestRuns.get(i).areaUnderPRC(0) + delimiter +
-						randomForestRuns.get(i).kappa() + delimiter + "\n");
+						Utilities.roundDouble(randomForestRuns.get(i).precision(0), 3) + delimiter +
+						Utilities.roundDouble(randomForestRuns.get(i).recall(0), 3) + delimiter +
+						Utilities.roundDouble(randomForestRuns.get(i).areaUnderPRC(0), 3) + delimiter +
+						Utilities.roundDouble(randomForestRuns.get(i).kappa(), 3) + delimiter + "\n");
 					writer.write(projName + delimiter + (i+1) + delimiter +
 						"NaiveBayes" + delimiter +
-						naiveBayesRuns.get(i).precision(0) + delimiter +
-						naiveBayesRuns.get(i).recall(0) + delimiter +
-						naiveBayesRuns.get(i).areaUnderPRC(0) + delimiter +
-						naiveBayesRuns.get(i).kappa() + delimiter + "\n");
+						Utilities.roundDouble(naiveBayesRuns.get(i).precision(0), 3) + delimiter +
+						Utilities.roundDouble(naiveBayesRuns.get(i).recall(0), 3) + delimiter +
+						Utilities.roundDouble(naiveBayesRuns.get(i).areaUnderPRC(0), 3) + delimiter +
+						Utilities.roundDouble(naiveBayesRuns.get(i).kappa(), 3) + delimiter + "\n");
 					writer.write(projName + delimiter + (i+1) + delimiter +
 						"IBk" + delimiter +
-						ibkRuns.get(i).precision(0) + delimiter +
-						ibkRuns.get(i).recall(0) + delimiter +
-						ibkRuns.get(i).areaUnderPRC(0) + delimiter +
-						ibkRuns.get(i).kappa() + delimiter + "\n");
+						Utilities.roundDouble(ibkRuns.get(i).precision(0), 3) + delimiter +
+						Utilities.roundDouble(ibkRuns.get(i).recall(0), 3) + delimiter +
+						Utilities.roundDouble(ibkRuns.get(i).areaUnderPRC(0), 3) + delimiter +
+						Utilities.roundDouble(ibkRuns.get(i).kappa(), 3) + delimiter + "\n");
 			
 			}
 			writer.flush();

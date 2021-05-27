@@ -62,7 +62,7 @@ public class GetAllFiles {
 				versionInfo.get(i).updateSize();
 			}
 		}
-		
+	
 		if (versionInfo != null && tickets != null) {
 			for (var i = 0; i < versionInfo.size(); i++) {
 				for (var j = 0; j < tickets.size(); j ++) {
