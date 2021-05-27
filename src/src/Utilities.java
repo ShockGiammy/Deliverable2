@@ -27,7 +27,7 @@ public class Utilities {
 	
 	private Utilities() {
 	    throw new IllegalStateException("Utility class");
-	  }
+	}
 
 	
 	private static Logger logger = Logger.getLogger(Utilities.class.getName());
@@ -66,9 +66,9 @@ public class Utilities {
 	}
 	
 	public static void writeFile(String projName, List<VersionInfo> versionInfo) {
-		var delimiter = ";";
+		var delimiter = ",";
 		var user = "Gian Marco/";
-		String path = "C:/Users/" +  user + "Desktop/" + projName+ "_dataset.csv";
+		String path = "C:/Users/" +  user + "Desktop/Falessi Deliverables/dataset/" + projName+ "_dataset.csv";
 		File file;
 		file = new File(path);
 		if (file.exists())
@@ -97,6 +97,21 @@ public class Utilities {
 					+ "MAX_Churn" + delimiter 
 					+ "AVG_Churn" + delimiter 
 					+ "bugginess" + "\n");
+					
+			/*writer.write("@RELATION iris\n\n" +
+			   "@ATTRIBUTE Version name  STRING\n" +
+			   "@ATTRIBUTE File name   STRING\n" +
+			   "@ATTRIBUTE Size   NUMERIC\n" +
+			   "@ATTRIBUTE NR   NUMERIC\n" +
+			   "@ATTRIBUTE NAuth   NUMERIC\n" +
+			   "@ATTRIBUTE LOCTouched   NUMERIC\n" +
+			   "@ATTRIBUTE LOCAdded   NUMERIC\n" +
+			   "@ATTRIBUTE MAX_LOC_Added   NUMERIC\n" +
+			   "@ATTRIBUTE AVG_LOC_Added   NUMERIC\n" +
+			   "@ATTRIBUTE Churn   NUMERIC\n" +
+			   "@ATTRIBUTE MAX_Churn   NUMERIC\n" +
+			   "@ATTRIBUTE AVG_Churn   NUMERIC\n" +
+			   "@ATTRIBUTE bugginess     {YES,NO}"); */
 			
 			for (var i = 0; i < versionInfo.size(); i++) {
 				List<String> classes = versionInfo.get(i).getJavaClasses();

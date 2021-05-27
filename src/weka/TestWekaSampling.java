@@ -21,12 +21,10 @@ import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.RandomForest;
 import weka.filters.supervised.instance.Resample;
+import weka.filters.supervised.instance.SMOTE;
 import weka.filters.supervised.instance.SpreadSubsample;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.classifiers.evaluation.*;
-//import weka.filters.supervised.instance.SMOTE;
-
-
 
 
 public class TestWekaSampling{
@@ -65,13 +63,13 @@ public class TestWekaSampling{
 				RandomForest RandomForest2 = new RandomForest();
 				fc.setClassifier(RandomForest2);
 				
-				//fc.setFilter(resample);
+				fc.setFilter(resample);
 				//eventual parameters setting omitted
 				
 				
-				//SMOTE smote = new SMOTE();
-				//smote.setInputFormat(training);
-				//fc.setFilter(smote);
+				SMOTE smote = new SMOTE();
+				smote.setInputFormat(training);
+				fc.setFilter(smote);
 				
 				SpreadSubsample  spreadSubsample = new SpreadSubsample();
 				String[] opts = new String[]{ "-M", "1.0"};
