@@ -108,11 +108,9 @@ public class TestWeka{
 
 	private static void writeStatisticsOnFile(String projName) {
 		
-		var delimiter = ",";
 		var user = "Gian Marco/";
 		String path = "C:/Users/" +  user + "Desktop/Falessi Deliverables/" + projName+ "_results.csv";
-		File file;
-		file = new File(path);
+		var file = new File(path);
 		if (file.exists())
 			logger.log(Level.INFO, "Il file {0} esiste", path);
 		else
@@ -124,6 +122,8 @@ public class TestWeka{
 			} catch (IOException e) {
 				e.printStackTrace();
 		}
+		
+		var delimiter = ",";
 		try (
 				var writer = new BufferedWriter(new FileWriter(file));
 				) {
