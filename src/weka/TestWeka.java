@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import src.Utilities;
+import src.VersionInfo;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.RandomForest;
 import weka.classifiers.bayes.NaiveBayes;
@@ -24,14 +25,15 @@ import weka.classifiers.rules.ZeroR;
 
 public class TestWeka{
 	
-	static List<Evaluation> randomForestRuns = new ArrayList<>();
-	static List<Evaluation> naiveBayesRuns = new ArrayList<>();
-	static List<Evaluation> ibkRuns = new ArrayList<>();
-	static int numberParts = 10;
+	List<Evaluation> randomForestRuns = new ArrayList<>();
+	List<Evaluation> naiveBayesRuns = new ArrayList<>();
+	List<Evaluation> ibkRuns = new ArrayList<>();
+	private int removeLastHalf;
 	
-	public static void main(String[] args) throws Exception {
+	public TestWeka(String projName, List<VersionInfo> versionInfo, int removeLastHalf) throws Exception {
 		
-		var projName = "BOOKKEEPER";
+		this.removeLastHalf = removeLastHalf;
+		var delimiter = ",";
 		var user = "Gian Marco/";
 		String basePath = "C:/Users/" +  user + "Desktop/Falessi Deliverables/dataset/" + projName;
 		
@@ -44,50 +46,37 @@ public class TestWeka{
 		var testingPath = basePath + "_testing.csv";
 		var testingFile = new File(testingPath);
 		
-		var rows = 0;
-		String header = null;
-		try (			
-				var reader = new BufferedReader(new FileReader(originalDataset));
-				) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				rows++;
-				if (rows == 1) {
-					header = line;
-				}
-			}
-			rows--;
-		}
+		String header = getHeaderFile(originalDataset);
 		
-		int lenghtPart = (rows/numberParts);
-		String line;
-		for (var i = 1; i < numberParts; i++) {		
-			
-			rows = 0;
+		String line = null;
+		for (var i = 1; i < removeLastHalf; i++) {		
 			try (	
 				var reader = new BufferedReader(new FileReader(originalDataset));
 				) {
 				try (	
 					var trainingWriter =  new PrintWriter(new FileWriter(trainingFile));
 					) {
-					while ((line = reader.readLine()) != null && rows < (lenghtPart*i)) {
-						trainingWriter.println(line);
-						rows++;
+					for (var j = 0; j < i; j++) {
+						while ((line = reader.readLine()) != null && (line.split(delimiter)[0].contains(versionInfo.get(j).getVersionName()) ||
+								line.split(delimiter)[0].contains("Version name"))) {
+							trainingWriter.println(line);
+						}
+						if (j != i-1) {
+							trainingWriter.println(line);
+						}
 					}
-				}
-				try (	
-					var testingWriter=  new PrintWriter(new FileWriter(testingFile));
-					) {
-					testingWriter.println(header);
-					testingWriter.println(line);
-					while ((line = reader.readLine()) != null && rows < (lenghtPart*(i+1))) {
-						rows++;
-						if (rows > (lenghtPart*(i))) {
+					try (	
+							var testingWriter=  new PrintWriter(new FileWriter(testingFile));
+							) {
+						testingWriter.println(header);
+						testingWriter.println(line);
+						while ((line = reader.readLine()) != null && line.split(delimiter)[0].contains(versionInfo.get(i).getVersionName())) {
 							testingWriter.println(line);
 						}
 					}
 				}
 			}
+			
 			var trainingArff = basePath + "_training.arff";
 			var trainingFileArff = new File(trainingArff);
 			CSV2Arff.convertCsv2Arff(trainingFile, trainingFileArff);
@@ -102,8 +91,25 @@ public class TestWeka{
 		
 		writeStatisticsOnFile(projName);
 	}
+	
+	private String getHeaderFile(File originalDataset) throws IOException {
+		var rows = 0;
+		String header = null;
+		try (			
+				var reader = new BufferedReader(new FileReader(originalDataset));
+				) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				rows++;
+				if (rows == 1) {
+					header = line;
+				}
+			}
+		}
+		return header;
+	}
 
-	private static void writeStatisticsOnFile(String projName) {
+	private void writeStatisticsOnFile(String projName) {
 		
 		
 		var delimiter = ",";
@@ -122,7 +128,7 @@ public class TestWeka{
 					+ "AUC" + delimiter
 					+ "Kappa" + "\n");
 					
-			for (var i = 0; i < numberParts-1; i++) {
+			for (var i = 0; i < removeLastHalf-1; i++) {
 					writer.write(projName + delimiter + (i+1) + delimiter +
 						"RandomForest" + delimiter +
 						Utilities.roundDouble(randomForestRuns.get(i).precision(0), 3) + delimiter +
@@ -150,7 +156,7 @@ public class TestWeka{
 	}
 	
 	
-	private static void calculateStatistics(String trainingPath, String testingPath) throws Exception {
+	private void calculateStatistics(String trainingPath, String testingPath) throws Exception {
 		
 		var training = new Instances(new BufferedReader(new FileReader(trainingPath)));
 		

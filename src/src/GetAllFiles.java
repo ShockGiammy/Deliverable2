@@ -14,14 +14,16 @@ import java.util.regex.Pattern;
 
 import org.json.JSONException;
 
+import weka.TestWeka;
+
 public class GetAllFiles {
 
 	static List<String> buggyClasses = new ArrayList<>();
 	static String shell = "cmd.exe";
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		
-		var projName ="BOOKKEEPER";  //BOOKKEEPER
+		var projName ="AVRO";  //BOOKKEEPER
 		
 		List<VersionInfo> versionInfo = null;
 		List<JiraTicket> tickets = null;
@@ -57,7 +59,9 @@ public class GetAllFiles {
 			associateOpeningVersion(projName, versionInfo, tickets);
 		}
 		
+		var removeLastHalf = 0;
 		if (versionInfo != null) {
+			removeLastHalf = (versionInfo.size()+1)/2;
 			for (var i = 1; i < versionInfo.size(); i++) {
 				versionInfo.get(i).updateSize();
 			}
@@ -71,8 +75,11 @@ public class GetAllFiles {
 			}
 		}
 
-		Utilities.writeFile(projName, versionInfo);
+		
+		Utilities.writeFile(projName, versionInfo, removeLastHalf);
 		Utilities.deleteDir(new File(projName));
+		
+		new TestWeka(projName, versionInfo, removeLastHalf);
 	}
 	
 	public static void associateOpeningVersion(String projName, List<VersionInfo> versionInfo, List<JiraTicket> tickets) {

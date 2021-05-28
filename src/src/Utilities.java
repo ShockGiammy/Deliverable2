@@ -67,7 +67,8 @@ public class Utilities {
 		}
 	}
 	
-	public static void writeFile(String projName, List<VersionInfo> versionInfo) {
+	public static void writeFile(String projName, List<VersionInfo> versionInfo, int removeLastHalf) {
+		
 		var delimiter = ",";
 		var user = "Gian Marco/";
 		String path = "C:/Users/" +  user + "Desktop/Falessi Deliverables/dataset/" + projName+ "_dataset.csv";
@@ -90,7 +91,7 @@ public class Utilities {
 					+ "AVG_Churn" + delimiter 
 					+ "bugginess" + "\n");
 					
-			for (var i = 0; i < versionInfo.size(); i++) {
+			for (var i = 0; i < removeLastHalf; i++) {
 				List<String> classes = versionInfo.get(i).getJavaClasses();
 				for (var j = 0; j < classes.size(); j++) {
 				
