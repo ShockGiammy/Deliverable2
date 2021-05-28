@@ -67,7 +67,7 @@ public class Utilities {
 		}
 	}
 	
-	public static void writeFile(String projName, List<VersionInfo> versionInfo, int removeLastHalf) {
+	public static void writeFile(String projName, List<VersionInfo> versionInfo, int remainingReleases) {
 		
 		var delimiter = ",";
 		var user = "Gian Marco/";
@@ -91,7 +91,7 @@ public class Utilities {
 					+ "AVG_Churn" + delimiter 
 					+ "bugginess" + "\n");
 					
-			for (var i = 0; i < removeLastHalf; i++) {
+			for (var i = 0; i < remainingReleases; i++) {
 				List<String> classes = versionInfo.get(i).getJavaClasses();
 				for (var j = 0; j < classes.size(); j++) {
 				

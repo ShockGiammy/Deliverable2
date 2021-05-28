@@ -3,7 +3,6 @@ package weka;
 import weka.core.Instances;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -12,15 +11,16 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import src.Utilities;
 import src.VersionInfo;
+import weka.attributeSelection.BestFirst;
+import weka.attributeSelection.CfsSubsetEval;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.RandomForest;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.filters.Filter;
+import weka.filters.supervised.attribute.AttributeSelection;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.classifiers.lazy.IBk;
-import weka.classifiers.rules.ZeroR;
 
 
 public class TestWeka{
@@ -28,12 +28,16 @@ public class TestWeka{
 	List<Evaluation> randomForestRuns = new ArrayList<>();
 	List<Evaluation> naiveBayesRuns = new ArrayList<>();
 	List<Evaluation> ibkRuns = new ArrayList<>();
-	private int removeLastHalf;
+	private int releases;
+	private String delimiter = ",";
 	
-	public TestWeka(String projName, List<VersionInfo> versionInfo, int removeLastHalf) throws Exception {
+	private int originalRows;
+	private List<Integer> trainingRows = new ArrayList<>();
+	
+	
+	public TestWeka(String projName, List<VersionInfo> versionInfo, int remainingReleases) throws Exception {
 		
-		this.removeLastHalf = removeLastHalf;
-		var delimiter = ",";
+		this.releases = remainingReleases;
 		var user = "Gian Marco/";
 		String basePath = "C:/Users/" +  user + "Desktop/Falessi Deliverables/dataset/" + projName;
 		
@@ -49,7 +53,8 @@ public class TestWeka{
 		String header = getHeaderFile(originalDataset);
 		
 		String line = null;
-		for (var i = 1; i < removeLastHalf; i++) {		
+		for (var i = 1; i < releases; i++) {	
+			var count = 0;
 			try (	
 				var reader = new BufferedReader(new FileReader(originalDataset));
 				) {
@@ -60,6 +65,7 @@ public class TestWeka{
 						while ((line = reader.readLine()) != null && (line.split(delimiter)[0].contains(versionInfo.get(j).getVersionName()) ||
 								line.split(delimiter)[0].contains("Version name"))) {
 							trainingWriter.println(line);
+							count++;
 						}
 						if (j != i-1) {
 							trainingWriter.println(line);
@@ -77,6 +83,7 @@ public class TestWeka{
 				}
 			}
 			
+			trainingRows.add(count);
 			var trainingArff = basePath + "_training.arff";
 			var trainingFileArff = new File(trainingArff);
 			CSV2Arff.convertCsv2Arff(trainingFile, trainingFileArff);
@@ -89,70 +96,26 @@ public class TestWeka{
 			calculateStatistics(trainingArff, testingArff);
         }
 		
-		writeStatisticsOnFile(projName);
+		var writer = new WriteResults(projName, randomForestRuns, naiveBayesRuns, ibkRuns, originalRows, releases, trainingRows);
+		writer.writeStatisticsOnFile();
 	}
 	
 	private String getHeaderFile(File originalDataset) throws IOException {
-		var rows = 0;
+		var count = 0;
 		String header = null;
 		try (			
 				var reader = new BufferedReader(new FileReader(originalDataset));
 				) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				rows++;
-				if (rows == 1) {
+				count++;
+				if (count == 1) {
 					header = line;
 				}
 			}
 		}
+		this.originalRows = count;
 		return header;
-	}
-
-	private void writeStatisticsOnFile(String projName) {
-		
-		
-		var delimiter = ",";
-		var user = "Gian Marco/";
-		String path = "C:/Users/" +  user + "Desktop/Falessi Deliverables/" + projName+ "_results.csv";
-		var file = new File(path);
-		Utilities.createFile(file, path);
-		
-		try (
-				var writer = new BufferedWriter(new FileWriter(file));
-				) {
-				writer.write("Dataset" + delimiter + "#TrainingRelease" + delimiter
-					+ "Classifier" + delimiter 
-					+ "Precision" + delimiter
-					+ "Recall" + delimiter
-					+ "AUC" + delimiter
-					+ "Kappa" + "\n");
-					
-			for (var i = 0; i < removeLastHalf-1; i++) {
-					writer.write(projName + delimiter + (i+1) + delimiter +
-						"RandomForest" + delimiter +
-						Utilities.roundDouble(randomForestRuns.get(i).precision(0), 3) + delimiter +
-						Utilities.roundDouble(randomForestRuns.get(i).recall(0), 3) + delimiter +
-						Utilities.roundDouble(randomForestRuns.get(i).areaUnderPRC(0), 3) + delimiter +
-						Utilities.roundDouble(randomForestRuns.get(i).kappa(), 3) + delimiter + "\n");
-					writer.write(projName + delimiter + (i+1) + delimiter +
-						"NaiveBayes" + delimiter +
-						Utilities.roundDouble(naiveBayesRuns.get(i).precision(0), 3) + delimiter +
-						Utilities.roundDouble(naiveBayesRuns.get(i).recall(0), 3) + delimiter +
-						Utilities.roundDouble(naiveBayesRuns.get(i).areaUnderPRC(0), 3) + delimiter +
-						Utilities.roundDouble(naiveBayesRuns.get(i).kappa(), 3) + delimiter + "\n");
-					writer.write(projName + delimiter + (i+1) + delimiter +
-						"IBk" + delimiter +
-						Utilities.roundDouble(ibkRuns.get(i).precision(0), 3) + delimiter +
-						Utilities.roundDouble(ibkRuns.get(i).recall(0), 3) + delimiter +
-						Utilities.roundDouble(ibkRuns.get(i).areaUnderPRC(0), 3) + delimiter +
-						Utilities.roundDouble(ibkRuns.get(i).kappa(), 3) + delimiter + "\n");
-			
-			}
-			writer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	
@@ -170,7 +133,12 @@ public class TestWeka{
 		removeFilter.setInputFormat(testing);
 		testing = Filter.useFilter(testing, removeFilter);
 		
-		
+		calculate(training, testing);
+		calculateBestFirst(training, testing);
+	}
+	
+	
+	private void calculate(Instances training, Instances testing) throws Exception {
 		int numAttr = training.numAttributes();
 		training.setClassIndex(numAttr - 1);
 		testing.setClassIndex(numAttr - 1);
@@ -195,10 +163,19 @@ public class TestWeka{
 		var evalIBk = new Evaluation(testing);	
 		evalIBk.evaluateModel(ibk, testing);
 		ibkRuns.add(evalIBk);
+	}
+	
+	
+	private void calculateBestFirst(Instances training, Instances testing) throws Exception {
+		var filter = new AttributeSelection();
+		var eval = new CfsSubsetEval();
+		var search = new BestFirst();
+		filter.setEvaluator(eval);
+		filter.setSearch(search);
+		filter.setInputFormat(training);
+		Instances bestFirstTraining = Filter.useFilter(training, filter);
+		Instances bestFirstTesting = Filter.useFilter(testing, filter);
 		
-		var zeroR = new ZeroR();
-		zeroR.buildClassifier(training);
-		var evalZeroR = new Evaluation(testing);	
-		evalZeroR.evaluateModel(zeroR, testing);
+		calculate(bestFirstTraining, bestFirstTesting);
 	}
 }

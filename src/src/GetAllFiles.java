@@ -59,9 +59,9 @@ public class GetAllFiles {
 			associateOpeningVersion(projName, versionInfo, tickets);
 		}
 		
-		var removeLastHalf = 0;
+		var remainingReleases = 0;
 		if (versionInfo != null) {
-			removeLastHalf = (versionInfo.size()+1)/2;
+			remainingReleases = (versionInfo.size()+1)/2;
 			for (var i = 1; i < versionInfo.size(); i++) {
 				versionInfo.get(i).updateSize();
 			}
@@ -76,10 +76,10 @@ public class GetAllFiles {
 		}
 
 		
-		Utilities.writeFile(projName, versionInfo, removeLastHalf);
+		Utilities.writeFile(projName, versionInfo, remainingReleases);
 		Utilities.deleteDir(new File(projName));
 		
-		new TestWeka(projName, versionInfo, removeLastHalf);
+		new TestWeka(projName, versionInfo, remainingReleases);
 	}
 	
 	public static void associateOpeningVersion(String projName, List<VersionInfo> versionInfo, List<JiraTicket> tickets) {
