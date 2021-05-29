@@ -72,7 +72,7 @@ public class WriteResults {
 			}
 			writer.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utilities.logError(e);
 		}
 	}
 	

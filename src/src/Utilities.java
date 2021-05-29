@@ -120,7 +120,7 @@ public class Utilities {
 			}
 			writer.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logError(e);
 		}
 	}
 	
@@ -155,7 +155,7 @@ public class Utilities {
 				else
 					logger.log(Level.INFO, "Il file {0} non può essere creato", path);
 			} catch (IOException e) {
-				e.printStackTrace();
+				logError(e);
 		}
 	}
 	
@@ -169,5 +169,9 @@ public class Utilities {
     	else {
     		return d;
     	}
+    }
+    
+    public static void logError(Exception e) {
+    	logger.log(Level.SEVERE, "Something went wrong: {0} ", e.toString());
     }
 }

@@ -32,7 +32,7 @@ public class GetAllFiles {
 		try {
 			cloneProject(projName);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Utilities.logError(e);
 		}
 		
 		var proportion = new ProportionCalculator(versionsList);
@@ -40,19 +40,19 @@ public class GetAllFiles {
 		try {
 			versionInfo = new GetReleaseInfo().getReleaseInfo(projName, proportion, versionsList);
 		} catch (JSONException | IOException e) {
-			e.printStackTrace();
+			Utilities.logError(e);
 		}
 		
 		try {
 			locAnalysis(projName, versionInfo);
 		} catch (IOException | ParseException e) {
-			e.printStackTrace();
+			Utilities.logError(e);
 		}
 		
 		try {
 			tickets = new RetrieveTicketsID().retrieveTicketsID(projName);
 		} catch (JSONException | IOException | ParseException e) {
-			e.printStackTrace();
+			Utilities.logError(e);
 		}
 		
 		if (tickets != null) {
@@ -87,7 +87,7 @@ public class GetAllFiles {
 			try {
 				retrieveCommitsID(projName, tickets.get(i));
 			} catch (IOException e) {
-				e.printStackTrace();
+				Utilities.logError(e);
 			}
 			if (versionInfo != null) {
 				for (var j = 0; j < versionInfo.size()-1; j++) {
