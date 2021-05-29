@@ -19,8 +19,12 @@ import weka.classifiers.trees.RandomForest;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.AttributeSelection;
+import weka.filters.supervised.instance.Resample;
+import weka.filters.supervised.instance.SMOTE;
+import weka.filters.supervised.instance.SpreadSubsample;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.classifiers.lazy.IBk;
+import weka.classifiers.meta.FilteredClassifier;
 
 
 public class TestWeka{
@@ -33,7 +37,8 @@ public class TestWeka{
 	
 	private int originalRows;
 	private List<Integer> trainingRows = new ArrayList<>();
-	
+	private List<Integer> defectsTrain = new ArrayList<>();
+
 	
 	public TestWeka(String projName, List<VersionInfo> versionInfo, int remainingReleases) throws Exception {
 		
@@ -55,6 +60,7 @@ public class TestWeka{
 		String line = null;
 		for (var i = 1; i < releases; i++) {	
 			var count = 0;
+			var defects = 0;
 			try (	
 				var reader = new BufferedReader(new FileReader(originalDataset));
 				) {
@@ -66,6 +72,9 @@ public class TestWeka{
 								line.split(delimiter)[0].contains("Version name"))) {
 							trainingWriter.println(line);
 							count++;
+							if (line.contains("YES")) {
+								defects++;
+							}
 						}
 						if (j != i-1) {
 							trainingWriter.println(line);
@@ -84,6 +93,7 @@ public class TestWeka{
 			}
 			
 			trainingRows.add(count);
+			defectsTrain.add(defects);
 			var trainingArff = basePath + "_training.arff";
 			var trainingFileArff = new File(trainingArff);
 			CSV2Arff.convertCsv2Arff(trainingFile, trainingFileArff);
@@ -96,7 +106,8 @@ public class TestWeka{
 			calculateStatistics(trainingArff, testingArff);
         }
 		
-		var writer = new WriteResults(projName, randomForestRuns, naiveBayesRuns, ibkRuns, originalRows, releases, trainingRows);
+		var writer = new WriteResults(projName);
+		writer.setParametres(randomForestRuns, naiveBayesRuns, ibkRuns, originalRows, releases, trainingRows, defectsTrain);
 		writer.writeStatisticsOnFile();
 	}
 	
@@ -133,16 +144,47 @@ public class TestWeka{
 		removeFilter.setInputFormat(testing);
 		testing = Filter.useFilter(testing, removeFilter);
 		
+		for (var i = 0; i < 4; i++) {
+			for (var j = 0; j < 2; j++) {
+				//for (var k = 0; k < 3; k++) {
+					applyFiltersAndCalculate(training, testing, i, j); //, k);
+				//}
+			}
+		}
+	}
+	
+	private void applyFiltersAndCalculate(Instances training, Instances testing, int i, int j) throws Exception {
+		int numAttr = training.numAttributes();
+		training.setClassIndex(numAttr - 1);
+		testing.setClassIndex(numAttr - 1);
+
+		if (i == 1) {
+			training = calculateOverSampling(training);
+		}
+		else if (i == 2) {
+			training = calculateUnderSampling(training);
+		}
+		else if (i == 3) {
+			training = calculateSmote(training);
+		}
+
+		if (j == 1) {
+			List<Instances> instances =  calculateBestFirst(training, testing);
+			training = instances.get(0);
+			testing = instances.get(1);
+		}
+
+		/*if (k == 1) {
+			
+		}
+		else if (k == 2) {
+			
+		}*/
 		calculate(training, testing);
-		calculateBestFirst(training, testing);
 	}
 	
 	
 	private void calculate(Instances training, Instances testing) throws Exception {
-		int numAttr = training.numAttributes();
-		training.setClassIndex(numAttr - 1);
-		testing.setClassIndex(numAttr - 1);
-		
 		
 		var randomForest = new RandomForest();
 		var naiveBayes = new NaiveBayes();
@@ -166,7 +208,7 @@ public class TestWeka{
 	}
 	
 	
-	private void calculateBestFirst(Instances training, Instances testing) throws Exception {
+	private List<Instances> calculateBestFirst(Instances training, Instances testing) throws Exception {
 		var filter = new AttributeSelection();
 		var eval = new CfsSubsetEval();
 		var search = new BestFirst();
@@ -175,7 +217,46 @@ public class TestWeka{
 		filter.setInputFormat(training);
 		Instances bestFirstTraining = Filter.useFilter(training, filter);
 		Instances bestFirstTesting = Filter.useFilter(testing, filter);
+		List<Instances> instances = new ArrayList<>();
+		instances.add(bestFirstTraining);
+		instances.add(bestFirstTesting);
 		
-		calculate(bestFirstTraining, bestFirstTesting);
+		return instances;
+	}
+	
+	private Instances calculateOverSampling(Instances training) throws Exception {
+		
+		var fc = new FilteredClassifier();
+		
+		var resample = new Resample();
+		String[] opts = new String[]{ "-B", "1.0", "-Z", "130.3"};
+		resample.setOptions(opts);
+		resample.setInputFormat(training);
+		fc.setFilter(resample);
+		
+		return Filter.useFilter(training, resample);
+	}
+	
+	private Instances calculateUnderSampling(Instances training) throws Exception {
+
+		var fc = new FilteredClassifier();
+		
+		var  spreadSubsample = new SpreadSubsample();
+		String[] opts = new String[]{ "-M", "1.0"};
+		spreadSubsample.setOptions(opts);
+		spreadSubsample.setInputFormat(training);
+		fc.setFilter(spreadSubsample);
+		
+		return Filter.useFilter(training, spreadSubsample);
+	}
+	
+	private Instances calculateSmote(Instances training) throws Exception {
+
+		var fc = new FilteredClassifier();
+		var smote = new SMOTE();
+		smote.setInputFormat(training);
+		fc.setFilter(smote);
+		
+		return Filter.useFilter(training, smote);
 	}
 }

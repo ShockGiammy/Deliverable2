@@ -19,21 +19,30 @@ public class WriteResults {
 	private int originalRows;
 	private int releases;
 	private List<Integer> trainingRows;
+	private List<Integer> defectsTrain;
 	
+	private String[] balancing = {"No sampling", "oversampling", "undersampling", "SMOTE"};
 	private String[] featureSelection = {"No Feature Selection", "Best first"};
-	private String[] sampling = {"No sampling", "oversampling", "undersampling", "SMOTE"};
 	private String[] sensitive = {"No cost sensitive", "Sensitive Threshold", "Sensitive Learning"};
 	
-	public WriteResults(String projName, List<Evaluation> randomForestRuns, List<Evaluation> naiveBayesRuns, List<Evaluation> ibkRuns, int originalRows, int releases, List<Integer> trainingRows) {
+	
+	public WriteResults(String projName) {
+		
+		this.projName = projName;
+	}
+	
+	public void setParametres(List<Evaluation> randomForestRuns, List<Evaluation> naiveBayesRuns, List<Evaluation> ibkRuns, int originalRows, int releases, List<Integer> trainingRows, List<Integer> defectsTrain) {
 		
 		this.randomForestRuns = randomForestRuns;
 		this.naiveBayesRuns = naiveBayesRuns;
 		this.ibkRuns = ibkRuns;
-		this.projName = projName;
+		
 		this.originalRows = originalRows;
 		this.releases = releases;
 		this.trainingRows = trainingRows;
+		this.defectsTrain = defectsTrain;
 	}
+	
 
 	public void writeStatisticsOnFile() {
 		
@@ -63,11 +72,18 @@ public class WriteResults {
 					+ "AUC" + delimiter
 					+ "Kappa" + "\n");
 				
-			var trainingRelease = 0;	
-			for (var i = 0; i < (releases-1)*2; i+=2) {
-				trainingRelease++;
-				for (var j = 0; j < featureSelection.length; j++) {
-					writeValues(writer, trainingRelease, i, featureSelection[j], sampling[0], sensitive[0]);
+			var trainingRelease = 0;
+			var j = 0;
+			var k = 0;
+			var runsForRelease = (balancing.length)*(featureSelection.length);
+			for (var i = 0; i < (releases-1)*runsForRelease; i++) {
+				if ((i%runsForRelease) == 0) {
+					trainingRelease++;
+				}
+				writeValues(writer, trainingRelease, i, balancing[j], featureSelection[k], sensitive[0]);
+				k = (k+1)%featureSelection.length;
+				if (k == 0) {
+					j = (j+1)%balancing.length;
 				}
 			}
 			writer.flush();
@@ -81,8 +97,10 @@ public class WriteResults {
 		writer.write(projName + delimiter + 
 				trainingRelease + delimiter +
 				Utilities.roundDouble((Double.valueOf(trainingRows.get(trainingRelease-1))/originalRows)*100, 2) + "%" + delimiter +
-				"Defective in training" + delimiter +
-				Utilities.roundDouble(randomForestRuns.get(i).errorRate(), 2) + "%" + delimiter +
+				Utilities.roundDouble((Double.valueOf(defectsTrain.get(trainingRelease-1))/trainingRows.get(trainingRelease-1))*100, 2) + "%" + delimiter +
+				Utilities.roundDouble(((randomForestRuns.get(i).numTruePositives(0)+randomForestRuns.get(i).numFalseNegatives(0))/
+						(randomForestRuns.get(i).numTruePositives(0)+randomForestRuns.get(i).numFalsePositives(0)+randomForestRuns.get(i).numTrueNegatives(0)+randomForestRuns.get(i).numFalseNegatives(0))), 2) 
+				+ "%" + delimiter +
 				sampling + delimiter +
 				featureSelection + delimiter +
 				sensitive + delimiter +
@@ -98,8 +116,10 @@ public class WriteResults {
 		writer.write(projName + delimiter +
 				trainingRelease + delimiter +
 				Utilities.roundDouble((Double.valueOf(trainingRows.get(trainingRelease-1))/originalRows)*100, 2) + "%" + delimiter +
-				"Defective in training" + delimiter +
-				Utilities.roundDouble(naiveBayesRuns.get(i).errorRate(), 2) + "%" + delimiter +
+				Utilities.roundDouble((Double.valueOf(defectsTrain.get(trainingRelease-1))/trainingRows.get(trainingRelease-1))*100, 2) + "%" + delimiter +
+				Utilities.roundDouble(((naiveBayesRuns.get(i).numTruePositives(0)+naiveBayesRuns.get(i).numFalseNegatives(0))/
+						(naiveBayesRuns.get(i).numTruePositives(0)+naiveBayesRuns.get(i).numFalsePositives(0)+naiveBayesRuns.get(i).numTrueNegatives(0)+naiveBayesRuns.get(i).numFalseNegatives(0))), 2)
+				+ "%" + delimiter +
 				sampling + delimiter +
 				featureSelection + delimiter +
 				sensitive + delimiter +
@@ -115,8 +135,10 @@ public class WriteResults {
 		writer.write(projName + delimiter +
 				trainingRelease + delimiter +
 				Utilities.roundDouble((Double.valueOf(trainingRows.get(trainingRelease-1))/originalRows)*100, 2) + "%" + delimiter +
-				"Defective in training" + delimiter +
-				Utilities.roundDouble(ibkRuns.get(i).errorRate(), 2) + "%"  + delimiter +
+				Utilities.roundDouble((Double.valueOf(defectsTrain.get(trainingRelease-1))/trainingRows.get(trainingRelease-1))*100, 2) + "%" + delimiter +
+				Utilities.roundDouble(((ibkRuns.get(i).numTruePositives(0)+ibkRuns.get(i).numFalseNegatives(0))/
+						(ibkRuns.get(i).numTruePositives(0)+ibkRuns.get(i).numFalsePositives(0)+ibkRuns.get(i).numTrueNegatives(0)+ibkRuns.get(i).numFalseNegatives(0))), 2)
+				+ "%" + delimiter +
 				sampling + delimiter +
 				featureSelection + delimiter +
 				sensitive + delimiter +
