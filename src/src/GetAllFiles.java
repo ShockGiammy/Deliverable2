@@ -23,7 +23,7 @@ public class GetAllFiles {
 
 	public static void main(String[] args) throws Exception {
 		
-		var projName ="AVRO";  //BOOKKEEPER  ZOOKEEPER
+		var projName ="ZOOKEEPER";  //BOOKKEEPER  ZOOKEEPER
 		
 		List<VersionInfo> versionInfo = null;
 		List<JiraTicket> tickets = null;
@@ -37,18 +37,21 @@ public class GetAllFiles {
 		
 		var proportion = new ProportionCalculator(versionsList);
 		
+		Utilities.logMsg("Getting releases informations...");
 		try {
 			versionInfo = new GetReleaseInfo().getReleaseInfo(projName, proportion, versionsList);
 		} catch (JSONException | IOException e) {
 			Utilities.logError(e);
 		}
 		
+		Utilities.logMsg("Calculating statistics on classes...");
 		try {
 			locAnalysis(projName, versionInfo);
 		} catch (IOException | ParseException e) {
 			Utilities.logError(e);
 		}
 		
+		Utilities.logMsg("Getting tickets informations...");
 		try {
 			tickets = new RetrieveTicketsID().retrieveTicketsID(projName);
 		} catch (JSONException | IOException | ParseException e) {
@@ -59,6 +62,7 @@ public class GetAllFiles {
 			associateOpeningVersion(projName, versionInfo, tickets);
 		}
 		
+		Utilities.logMsg("Updating classes' size...");
 		var remainingReleases = 0;
 		if (versionInfo != null) {
 			remainingReleases = (versionInfo.size()+1)/2;
@@ -79,6 +83,7 @@ public class GetAllFiles {
 		Utilities.writeFile(projName, versionInfo, remainingReleases);
 		Utilities.deleteDir(new File(projName));
 		
+		Utilities.logMsg("Starting weka analysis...");
 		new TestWeka(projName, versionInfo, remainingReleases);
 	}
 	

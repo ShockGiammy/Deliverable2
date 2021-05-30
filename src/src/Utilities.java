@@ -174,4 +174,12 @@ public class Utilities {
     public static void logError(Exception e) {
     	logger.log(Level.SEVERE, "Something went wrong: {0} ", e.toString());
     }
+    
+    public static void logMsg(String msg) {
+    	logger.log(Level.INFO, msg);
+    }
+
+	public static void logParametrizedMsg(int a) {
+		logger.log(Level.INFO, "Analyzing release {0}", a);
+	}
 }

@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import src.Utilities;
 import src.VersionInfo;
 import weka.attributeSelection.BestFirst;
 import weka.attributeSelection.CfsSubsetEval;
@@ -59,7 +60,8 @@ public class TestWeka{
 		String header = getHeaderFile(originalDataset);
 		
 		String line = null;
-		for (var i = 1; i < releases; i++) {	
+		for (var i = 1; i < releases; i++) {
+			Utilities.logParametrizedMsg(i);
 			var count = 0;
 			var defects = 0;
 			try (	
@@ -81,15 +83,7 @@ public class TestWeka{
 							trainingWriter.println(line);
 						}
 					}
-					try (	
-							var testingWriter=  new PrintWriter(new FileWriter(testingFile));
-							) {
-						testingWriter.println(header);
-						testingWriter.println(line);
-						while ((line = reader.readLine()) != null && line.split(delimiter)[0].contains(versionInfo.get(i).getVersionName())) {
-							testingWriter.println(line);
-						}
-					}
+					createTestingDataset(line, header, reader, i, versionInfo, testingFile);
 				}
 			}
 			
@@ -112,6 +106,20 @@ public class TestWeka{
 		writer.writeStatisticsOnFile();
 	}
 	
+	
+	private void createTestingDataset(String line, String header, BufferedReader reader, int i, List<VersionInfo> versionInfo, File testingFile) throws IOException {
+		try (	
+				var testingWriter=  new PrintWriter(new FileWriter(testingFile));
+				) {
+			testingWriter.println(header);
+			testingWriter.println(line);
+			while ((line = reader.readLine()) != null && line.split(delimiter)[0].contains(versionInfo.get(i).getVersionName())) {
+				testingWriter.println(line);
+			}
+		}
+	}
+	
+	
 	private String getHeaderFile(File originalDataset) throws IOException {
 		var count = 0;
 		String header = null;
@@ -131,6 +139,7 @@ public class TestWeka{
 	}
 	
 	
+	int[] indices = {0, 1};
 	private void calculateStatistics(String trainingPath, String testingPath) throws Exception {
 		
 		var training = new Instances(new BufferedReader(new FileReader(trainingPath)));
@@ -138,7 +147,6 @@ public class TestWeka{
 		var testing = new Instances(new BufferedReader(new FileReader(testingPath)));
 
 		var removeFilter = new Remove();
-		int[] indices = {0, 1};
 		removeFilter.setAttributeIndicesArray(indices);
 		removeFilter.setInputFormat(training);
 		training = Filter.useFilter(training, removeFilter);
@@ -181,7 +189,7 @@ public class TestWeka{
 			csClassifiers = calculateSensitiveThreshold();
 		}
 		else if (k == 2) {
-			calculateSensitiveLearning(training);
+			training = calculateSensitiveLearning(training);
 		}
 		calculate(training, testing, csClassifiers);
 	}
@@ -319,19 +327,21 @@ public class TestWeka{
 		return csClassifiers;
 	}
 	
-	private void calculateSensitiveLearning(Instances training) {
+	private Instances calculateSensitiveLearning(Instances training) {
 		
 		var weightFN = 10;
 		var attr = training.numAttributes();
 		var datasetLen = training.numInstances();
 		
+		var newTraining = new Instances(training);
 		for (var i = 0; i < datasetLen; i++) {
 			var instance = training.get(i);
 			if (instance.stringValue(attr-1).contains("YES")) {
 				for (var j = 0; j < weightFN-1; j++) {
-					training.add(instance);
+					newTraining.add(instance);
 				}
 			}
 		}
+		return newTraining;
 	}
 }
