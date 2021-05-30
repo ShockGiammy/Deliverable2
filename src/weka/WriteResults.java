@@ -75,15 +75,19 @@ public class WriteResults {
 			var trainingRelease = 0;
 			var j = 0;
 			var k = 0;
-			var runsForRelease = (balancing.length)*(featureSelection.length);
+			var l = 0;
+			var runsForRelease = (balancing.length)*(featureSelection.length)*(sensitive.length);
 			for (var i = 0; i < (releases-1)*runsForRelease; i++) {
 				if ((i%runsForRelease) == 0) {
 					trainingRelease++;
 				}
-				writeValues(writer, trainingRelease, i, balancing[j], featureSelection[k], sensitive[0]);
-				k = (k+1)%featureSelection.length;
-				if (k == 0) {
-					j = (j+1)%balancing.length;
+				writeValues(writer, trainingRelease, i, balancing[j], featureSelection[k], sensitive[l]);
+				l = (l+1)%sensitive.length;
+				if (l == 0) {
+					k = (k+1)%featureSelection.length;
+					if (k == 0) {
+						j = (j+1)%balancing.length;
+					}
 				}
 			}
 			writer.flush();
@@ -99,7 +103,7 @@ public class WriteResults {
 				Utilities.roundDouble((Double.valueOf(trainingRows.get(trainingRelease-1))/originalRows)*100, 2) + "%" + delimiter +
 				Utilities.roundDouble((Double.valueOf(defectsTrain.get(trainingRelease-1))/trainingRows.get(trainingRelease-1))*100, 2) + "%" + delimiter +
 				Utilities.roundDouble(((randomForestRuns.get(i).numTruePositives(0)+randomForestRuns.get(i).numFalseNegatives(0))/
-						(randomForestRuns.get(i).numTruePositives(0)+randomForestRuns.get(i).numFalsePositives(0)+randomForestRuns.get(i).numTrueNegatives(0)+randomForestRuns.get(i).numFalseNegatives(0))), 2) 
+						(randomForestRuns.get(i).numTruePositives(0)+randomForestRuns.get(i).numFalsePositives(0)+randomForestRuns.get(i).numTrueNegatives(0)+randomForestRuns.get(i).numFalseNegatives(0)))*100, 2) 
 				+ "%" + delimiter +
 				sampling + delimiter +
 				featureSelection + delimiter +
@@ -118,7 +122,7 @@ public class WriteResults {
 				Utilities.roundDouble((Double.valueOf(trainingRows.get(trainingRelease-1))/originalRows)*100, 2) + "%" + delimiter +
 				Utilities.roundDouble((Double.valueOf(defectsTrain.get(trainingRelease-1))/trainingRows.get(trainingRelease-1))*100, 2) + "%" + delimiter +
 				Utilities.roundDouble(((naiveBayesRuns.get(i).numTruePositives(0)+naiveBayesRuns.get(i).numFalseNegatives(0))/
-						(naiveBayesRuns.get(i).numTruePositives(0)+naiveBayesRuns.get(i).numFalsePositives(0)+naiveBayesRuns.get(i).numTrueNegatives(0)+naiveBayesRuns.get(i).numFalseNegatives(0))), 2)
+						(naiveBayesRuns.get(i).numTruePositives(0)+naiveBayesRuns.get(i).numFalsePositives(0)+naiveBayesRuns.get(i).numTrueNegatives(0)+naiveBayesRuns.get(i).numFalseNegatives(0)))*100, 2)
 				+ "%" + delimiter +
 				sampling + delimiter +
 				featureSelection + delimiter +
@@ -137,7 +141,7 @@ public class WriteResults {
 				Utilities.roundDouble((Double.valueOf(trainingRows.get(trainingRelease-1))/originalRows)*100, 2) + "%" + delimiter +
 				Utilities.roundDouble((Double.valueOf(defectsTrain.get(trainingRelease-1))/trainingRows.get(trainingRelease-1))*100, 2) + "%" + delimiter +
 				Utilities.roundDouble(((ibkRuns.get(i).numTruePositives(0)+ibkRuns.get(i).numFalseNegatives(0))/
-						(ibkRuns.get(i).numTruePositives(0)+ibkRuns.get(i).numFalsePositives(0)+ibkRuns.get(i).numTrueNegatives(0)+ibkRuns.get(i).numFalseNegatives(0))), 2)
+						(ibkRuns.get(i).numTruePositives(0)+ibkRuns.get(i).numFalsePositives(0)+ibkRuns.get(i).numTrueNegatives(0)+ibkRuns.get(i).numFalseNegatives(0)))*100, 2)
 				+ "%" + delimiter +
 				sampling + delimiter +
 				featureSelection + delimiter +

@@ -14,6 +14,7 @@ import java.util.List;
 import src.VersionInfo;
 import weka.attributeSelection.BestFirst;
 import weka.attributeSelection.CfsSubsetEval;
+import weka.classifiers.CostMatrix;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.RandomForest;
 import weka.classifiers.bayes.NaiveBayes;
@@ -24,6 +25,7 @@ import weka.filters.supervised.instance.SMOTE;
 import weka.filters.supervised.instance.SpreadSubsample;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.classifiers.lazy.IBk;
+import weka.classifiers.meta.CostSensitiveClassifier;
 import weka.classifiers.meta.FilteredClassifier;
 
 
@@ -38,7 +40,6 @@ public class TestWeka{
 	private int originalRows;
 	private List<Integer> trainingRows = new ArrayList<>();
 	private List<Integer> defectsTrain = new ArrayList<>();
-
 	
 	public TestWeka(String projName, List<VersionInfo> versionInfo, int remainingReleases) throws Exception {
 		
@@ -146,25 +147,27 @@ public class TestWeka{
 		
 		for (var i = 0; i < 4; i++) {
 			for (var j = 0; j < 2; j++) {
-				//for (var k = 0; k < 3; k++) {
-					applyFiltersAndCalculate(training, testing, i, j); //, k);
-				//}
+				for (var k = 0; k < 3; k++) {
+					applyFiltersAndCalculate(training, testing, i, j, k);
+				}
 			}
 		}
 	}
 	
-	private void applyFiltersAndCalculate(Instances training, Instances testing, int i, int j) throws Exception {
+	private void applyFiltersAndCalculate(Instances training, Instances testing, int i, int j, int k) throws Exception {
+		
 		int numAttr = training.numAttributes();
 		training.setClassIndex(numAttr - 1);
 		testing.setClassIndex(numAttr - 1);
 
+		List<CostSensitiveClassifier> csClassifiers = null;
 		if (i == 1) {
 			training = calculateOverSampling(training);
 		}
 		else if (i == 2) {
 			training = calculateUnderSampling(training);
 		}
-		else if (i == 3) {
+		else if (i == 3) {			
 			training = calculateSmote(training);
 		}
 
@@ -174,36 +177,61 @@ public class TestWeka{
 			testing = instances.get(1);
 		}
 
-		/*if (k == 1) {
-			
+		if (k == 1) {
+			csClassifiers = calculateSensitiveThreshold();
 		}
 		else if (k == 2) {
-			
-		}*/
-		calculate(training, testing);
+			calculateSensitiveLearning(training);
+		}
+		calculate(training, testing, csClassifiers);
 	}
 	
 	
-	private void calculate(Instances training, Instances testing) throws Exception {
+	private void calculate(Instances training, Instances testing, List<CostSensitiveClassifier> csClassifiers) throws Exception {
 		
-		var randomForest = new RandomForest();
-		var naiveBayes = new NaiveBayes();
-		var ibk = new IBk();
 		
-		randomForest.buildClassifier(training);
-		var evalRandomForest = new Evaluation(testing);	
-		evalRandomForest.evaluateModel(randomForest, testing);
+		Evaluation evalRandomForest = null;
+		Evaluation evalNaiveBayes = null;
+		Evaluation evalIBk = null;
+		if (csClassifiers == null) {
+			var randomForest = new RandomForest();
+			var naiveBayes = new NaiveBayes();
+			var ibk = new IBk();
+			
+			randomForest.buildClassifier(training);
+			evalRandomForest = new Evaluation(testing);	
+			evalRandomForest.evaluateModel(randomForest, testing);
+			
+			naiveBayes.buildClassifier(training);
+			evalNaiveBayes = new Evaluation(testing);	
+			evalNaiveBayes.evaluateModel(naiveBayes, testing);
+			
+			ibk.buildClassifier(training);
+			evalIBk = new Evaluation(testing);	
+			evalIBk.evaluateModel(ibk, testing);
+		}
+		else {
+			
+			var costSensitiveRF = csClassifiers.get(0);
+			costSensitiveRF.buildClassifier(training);	
+			evalRandomForest = new Evaluation(testing, costSensitiveRF.getCostMatrix());
+			evalRandomForest.evaluateModel(costSensitiveRF, testing);
+			
+			var costSensitiveNB = csClassifiers.get(1);
+			costSensitiveNB.buildClassifier(training);	
+			evalNaiveBayes = new Evaluation(testing, costSensitiveNB.getCostMatrix());
+			evalNaiveBayes.evaluateModel(costSensitiveNB, testing);
+			
+			var costSensitiveIBk = csClassifiers.get(2);
+			costSensitiveIBk.buildClassifier(training);	
+			evalIBk = new Evaluation(testing, costSensitiveIBk.getCostMatrix());
+			evalIBk.evaluateModel(costSensitiveIBk, testing);
+		}
+		
 		randomForestRuns.add(evalRandomForest);
-		
-		
-		naiveBayes.buildClassifier(training);
-		var evalNaiveBayes = new Evaluation(testing);	
-		evalNaiveBayes.evaluateModel(naiveBayes, testing); 
+
 		naiveBayesRuns.add(evalNaiveBayes);
-		
-		ibk.buildClassifier(training);
-		var evalIBk = new Evaluation(testing);	
-		evalIBk.evaluateModel(ibk, testing);
+
 		ibkRuns.add(evalIBk);
 	}
 	
@@ -229,7 +257,7 @@ public class TestWeka{
 		var fc = new FilteredClassifier();
 		
 		var resample = new Resample();
-		String[] opts = new String[]{ "-B", "1.0", "-Z", "130.3"};
+		var opts = new String[]{ "-B", "1.0", "-Z", "130.3"};
 		resample.setOptions(opts);
 		resample.setInputFormat(training);
 		fc.setFilter(resample);
@@ -242,7 +270,7 @@ public class TestWeka{
 		var fc = new FilteredClassifier();
 		
 		var  spreadSubsample = new SpreadSubsample();
-		String[] opts = new String[]{ "-M", "1.0"};
+		var opts = new String[]{ "-M", "1.0"};
 		spreadSubsample.setOptions(opts);
 		spreadSubsample.setInputFormat(training);
 		fc.setFilter(spreadSubsample);
@@ -258,5 +286,52 @@ public class TestWeka{
 		fc.setFilter(smote);
 		
 		return Filter.useFilter(training, smote);
+	}
+	
+	private CostMatrix createCostMatrix(double weightFalsePositive, double weightFalseNegative) {
+	    var costMatrix = new CostMatrix(2);
+	    costMatrix.setCell(0, 0, 0.0);
+	    costMatrix.setCell(1, 0, weightFalsePositive);
+	    costMatrix.setCell(0, 1, weightFalseNegative);
+	    costMatrix.setCell(1, 1, 0.0);
+	    return costMatrix;
+	}
+
+	private List<CostSensitiveClassifier> calculateSensitiveThreshold() {
+		
+		List<CostSensitiveClassifier> csClassifiers = new ArrayList<>();
+		
+		var costSensitiveRF = new CostSensitiveClassifier();
+		costSensitiveRF.setClassifier(new RandomForest());
+		costSensitiveRF.setCostMatrix(createCostMatrix(1, 10));
+		csClassifiers.add(costSensitiveRF);
+		
+		var costSensitiveNB = new CostSensitiveClassifier();
+		costSensitiveNB.setClassifier(new NaiveBayes());
+		costSensitiveNB.setCostMatrix(createCostMatrix(1, 10));
+		csClassifiers.add(costSensitiveNB);
+		
+		var costSensitiveIBk = new CostSensitiveClassifier();
+		costSensitiveIBk.setClassifier(new IBk());
+		costSensitiveIBk.setCostMatrix(createCostMatrix(1, 10));
+		csClassifiers.add(costSensitiveIBk);
+		
+		return csClassifiers;
+	}
+	
+	private void calculateSensitiveLearning(Instances training) {
+		
+		var weightFN = 10;
+		var attr = training.numAttributes();
+		var datasetLen = training.numInstances();
+		
+		for (var i = 0; i < datasetLen; i++) {
+			var instance = training.get(i);
+			if (instance.stringValue(attr-1).contains("YES")) {
+				for (var j = 0; j < weightFN-1; j++) {
+					training.add(instance);
+				}
+			}
+		}
 	}
 }
