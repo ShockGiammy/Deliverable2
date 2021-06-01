@@ -408,7 +408,7 @@ public class VersionInfo {
 			if (version.compareTo(iv) < 0) {
 				iv = version;
 			}
-			if (this.versionName.equals(version)) {
+			if (this.versionName.equals(version) && (!this.versionName.equals(fixVersion))) {
 				for (String buggyClass : classesToControl) {
 					setBuggy(buggyClass);
 				}

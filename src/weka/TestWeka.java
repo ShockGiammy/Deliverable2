@@ -237,9 +237,7 @@ public class TestWeka{
 		}
 		
 		randomForestRuns.add(evalRandomForest);
-
 		naiveBayesRuns.add(evalNaiveBayes);
-
 		ibkRuns.add(evalIBk);
 	}
 	
