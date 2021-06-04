@@ -402,18 +402,24 @@ public class VersionInfo {
 		}
 	}
 	
+	private void incrementProportion(String fixVersion, String iv, String openinigVersion)  {
+		if (fixVersion != null && openinigVersion != null) {
+			proportion.incrementComputing(fixVersion, iv, openinigVersion);
+		}
+	}
+	
 	private void setBuggyAndUpdateProportion(List<String> affectedVersion, List<String> classesToControl, String fixVersion, String openinigVersion) {
 		String iv = affectedVersion.get(0);
 		for (String version : affectedVersion) {
 			if (version.compareTo(iv) < 0) {
 				iv = version;
 			}
-			if (this.versionName.equals(version) && (!this.versionName.equals(fixVersion))) {
-				for (String buggyClass : classesToControl) {
-					setBuggy(buggyClass);
-				}
-				if (fixVersion != null && openinigVersion != null) {
-					proportion.incrementComputing(fixVersion, iv, openinigVersion);
+			if (this.versionName.equals(version)) {
+				incrementProportion(fixVersion, iv, openinigVersion);
+				if (!this.versionName.equals(fixVersion)) {
+					for (String buggyClass : classesToControl) {
+						setBuggy(buggyClass);
+					}
 				}
 			}
 		}
