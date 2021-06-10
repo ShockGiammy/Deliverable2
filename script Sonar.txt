@@ -44,3 +44,19 @@ Utilities.roundDouble(naiveBayesRuns.get(i).errorRate(), 2)
 		System.out.println("Recall = "+evalZeroR.recall(0));
 		System.out.println("AUC = "+evalZeroR.areaUnderPRC(0));
 		System.out.println("kappa = "+evalZeroR.kappa());
+		
+		
+		var weightFN = 10;
+		var attr = training.numAttributes();
+		var datasetLen = training.numInstances();
+		
+		var newTraining = new Instances(training);
+		for (var i = 0; i < datasetLen; i++) {
+			var instance = training.get(i);
+			if (instance.stringValue(attr-1).contains("YES")) {
+				for (var j = 0; j < weightFN-1; j++) {
+					newTraining.add(instance);
+				}
+			}
+		}
+		return newTraining;

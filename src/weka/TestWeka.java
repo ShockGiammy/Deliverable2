@@ -189,7 +189,7 @@ public class TestWeka{
 			csClassifiers = calculateSensitiveThreshold();
 		}
 		else if (k == 2) {
-			training = calculateSensitiveLearning(training);
+			csClassifiers = calculateSensitiveLearning();
 		}
 		calculate(training, testing, csClassifiers);
 	}
@@ -262,8 +262,28 @@ public class TestWeka{
 		
 		var fc = new FilteredClassifier();
 		
+		var countYes = 0;
+		var countNo = 0;
+		for (var i = 0; i < training.size(); i ++) {
+			if (training.get(i).stringValue(training.get(i).attribute(training.numAttributes()-1)).contains("YES")) {
+				countYes++;
+			}
+			else {
+				countNo++;
+			}
+		}
+		
+		double majorityPerc;
+		if (countYes > countNo) {
+			majorityPerc = Double.valueOf(countYes)/training.size()*100;
+		}
+		else {
+			majorityPerc = Double.valueOf(countNo)/training.size()*100;
+		}
+		
+		
 		var resample = new Resample();
-		var opts = new String[]{ "-B", "1.0", "-Z", "130.3"};
+		var opts = new String[]{ "-B", "1.0", "-Z", String.valueOf(majorityPerc*2)};
 		resample.setOptions(opts);
 		resample.setInputFormat(training);
 		fc.setFilter(resample);
@@ -310,36 +330,46 @@ public class TestWeka{
 		var costSensitiveRF = new CostSensitiveClassifier();
 		costSensitiveRF.setClassifier(new RandomForest());
 		costSensitiveRF.setCostMatrix(createCostMatrix(1, 10));
+		costSensitiveRF.setMinimizeExpectedCost(true);
 		csClassifiers.add(costSensitiveRF);
 		
 		var costSensitiveNB = new CostSensitiveClassifier();
 		costSensitiveNB.setClassifier(new NaiveBayes());
 		costSensitiveNB.setCostMatrix(createCostMatrix(1, 10));
+		costSensitiveNB.setMinimizeExpectedCost(true);
 		csClassifiers.add(costSensitiveNB);
 		
 		var costSensitiveIBk = new CostSensitiveClassifier();
 		costSensitiveIBk.setClassifier(new IBk());
 		costSensitiveIBk.setCostMatrix(createCostMatrix(1, 10));
+		costSensitiveIBk.setMinimizeExpectedCost(true);
 		csClassifiers.add(costSensitiveIBk);
 		
 		return csClassifiers;
 	}
 	
-	private Instances calculateSensitiveLearning(Instances training) {
+	private List<CostSensitiveClassifier> calculateSensitiveLearning() {
 		
-		var weightFN = 10;
-		var attr = training.numAttributes();
-		var datasetLen = training.numInstances();
+		List<CostSensitiveClassifier> csClassifiers = new ArrayList<>();
 		
-		var newTraining = new Instances(training);
-		for (var i = 0; i < datasetLen; i++) {
-			var instance = training.get(i);
-			if (instance.stringValue(attr-1).contains("YES")) {
-				for (var j = 0; j < weightFN-1; j++) {
-					newTraining.add(instance);
-				}
-			}
-		}
-		return newTraining;
+		var costSensitiveRF = new CostSensitiveClassifier();
+		costSensitiveRF.setClassifier(new RandomForest());
+		costSensitiveRF.setCostMatrix(createCostMatrix(1, 10));
+		costSensitiveRF.setMinimizeExpectedCost(false);
+		csClassifiers.add(costSensitiveRF);
+		
+		var costSensitiveNB = new CostSensitiveClassifier();
+		costSensitiveNB.setClassifier(new NaiveBayes());
+		costSensitiveNB.setCostMatrix(createCostMatrix(1, 10));
+		costSensitiveNB.setMinimizeExpectedCost(false);
+		csClassifiers.add(costSensitiveNB);
+		
+		var costSensitiveIBk = new CostSensitiveClassifier();
+		costSensitiveIBk.setClassifier(new IBk());
+		costSensitiveIBk.setCostMatrix(createCostMatrix(1, 10));
+		costSensitiveIBk.setMinimizeExpectedCost(false);
+		csClassifiers.add(costSensitiveIBk);
+		
+		return csClassifiers;
 	}
 }
