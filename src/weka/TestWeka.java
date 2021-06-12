@@ -306,11 +306,35 @@ public class TestWeka{
 	
 	private Instances calculateSmote(Instances training) throws Exception {
 
+		
+		var countYes = 0;
+		var countNo = 0;
+		for (var i = 0; i < training.size(); i ++) {
+			if (training.get(i).stringValue(training.get(i).attribute(training.numAttributes()-1)).contains("YES")) {
+				countYes++;
+			}
+			else {
+				countNo++;
+			}
+		}
+		double perc;
+		if (countYes > countNo && countNo!=0) {
+			perc = ((Double.valueOf(countYes)/countNo)-1)*100;
+		}
+		else if (countNo > countYes && countYes!=0){
+			perc = ((Double.valueOf(countNo)/countYes)-1)*100;
+		}
+		else {
+			perc = 100;
+		}
+		
 		var fc = new FilteredClassifier();
 		var smote = new SMOTE();
+		var opts = new String[]{ "-P", String.valueOf(perc)};
+		smote.setOptions(opts);
 		smote.setInputFormat(training);
 		fc.setFilter(smote);
-		
+
 		return Filter.useFilter(training, smote);
 	}
 	
