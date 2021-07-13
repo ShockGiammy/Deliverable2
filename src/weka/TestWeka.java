@@ -46,7 +46,7 @@ public class TestWeka{
 		
 		this.releases = remainingReleases;
 		var user = "Gian Marco/";
-		String basePath = "C:/Users/" +  user + "Desktop/Falessi Deliverables/dataset/" + projName;
+		String basePath = "C:/Users/" +  user + "Desktop/Deliverable2/dataset/" + projName;
 		
 		var path = basePath + "_dataset.csv";
 		var originalDataset = new File(path);

@@ -47,7 +47,7 @@ public class WriteResults {
 	public void writeStatisticsOnFile() {
 		
 		var user = "Gian Marco/";
-		String path = "C:/Users/" +  user + "Desktop/Falessi Deliverables/" + projName+ "_results.csv";
+		String path = "C:/Users/" +  user + "Desktop/Deliverable2/" + projName+ "_results.csv";
 		var file = new File(path);
 		Utilities.createFile(file, path);
 		
@@ -56,12 +56,12 @@ public class WriteResults {
 				) {
 				writer.write("Dataset" + delimiter
 					+ "#TrainingRelease" + delimiter
-					+ "%training" + delimiter					//to do
+					+ "%Training" + delimiter
 					+ "%Defective in training" + delimiter
 					+ "%Defective in testing" + delimiter
-					+ "balancing" + delimiter
+					+ "Balancing" + delimiter
 					+ "Feature Selection" + delimiter
-					+ "Sensitivity" + delimiter		//to do
+					+ "Sensitivity" + delimiter
 					+ "TP" + delimiter
 					+ "FP" + delimiter
 					+ "TN" + delimiter
@@ -302,7 +302,7 @@ public class WriteResults {
 		}
 	}
 	
-	private void writeValues(BufferedWriter writer, int trainingRelease, int i, String featureSelection, String sampling, String sensitive) throws IOException {
+	private void writeValues(BufferedWriter writer, int trainingRelease, int i, String balancing, String featureSelection, String sensitive) throws IOException {
 		writer.write(projName + delimiter + 
 				trainingRelease + delimiter +
 				Utilities.roundDouble((Double.valueOf(trainingRows.get(trainingRelease-1))/originalRows)*100, 2) + "%" + delimiter +
@@ -310,7 +310,7 @@ public class WriteResults {
 				Utilities.roundDouble(((randomForestRuns.get(i).numTruePositives(0)+randomForestRuns.get(i).numFalseNegatives(0))/
 						(randomForestRuns.get(i).numTruePositives(0)+randomForestRuns.get(i).numFalsePositives(0)+randomForestRuns.get(i).numTrueNegatives(0)+randomForestRuns.get(i).numFalseNegatives(0)))*100, 2) 
 				+ "%" + delimiter +
-				sampling + delimiter +
+				balancing + delimiter +
 				featureSelection + delimiter +
 				sensitive + delimiter +
 				randomForestRuns.get(i).numTruePositives(0) + delimiter +
@@ -330,7 +330,7 @@ public class WriteResults {
 				Utilities.roundDouble(((naiveBayesRuns.get(i).numTruePositives(0)+naiveBayesRuns.get(i).numFalseNegatives(0))/
 						(naiveBayesRuns.get(i).numTruePositives(0)+naiveBayesRuns.get(i).numFalsePositives(0)+naiveBayesRuns.get(i).numTrueNegatives(0)+naiveBayesRuns.get(i).numFalseNegatives(0)))*100, 2)
 				+ "%" + delimiter +
-				sampling + delimiter +
+				balancing + delimiter +
 				featureSelection + delimiter +
 				sensitive + delimiter +
 				naiveBayesRuns.get(i).numTruePositives(0) + delimiter +
@@ -350,7 +350,7 @@ public class WriteResults {
 				Utilities.roundDouble(((ibkRuns.get(i).numTruePositives(0)+ibkRuns.get(i).numFalseNegatives(0))/
 						(ibkRuns.get(i).numTruePositives(0)+ibkRuns.get(i).numFalsePositives(0)+ibkRuns.get(i).numTrueNegatives(0)+ibkRuns.get(i).numFalseNegatives(0)))*100, 2)
 				+ "%" + delimiter +
-				sampling + delimiter +
+				balancing + delimiter +
 				featureSelection + delimiter +
 				sensitive + delimiter +
 				ibkRuns.get(i).numTruePositives(0) + delimiter +

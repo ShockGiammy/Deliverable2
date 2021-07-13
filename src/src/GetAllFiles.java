@@ -23,7 +23,7 @@ public class GetAllFiles {
 
 	public static void main(String[] args) throws Exception {
 		
-		var projName ="AVRO";  //BOOKKEEPER  ZOOKEEPER
+		var projName ="AVRO";  //BOOKKEEPER
 		
 		List<VersionInfo> versionInfo = null;
 		List<JiraTicket> tickets = null;
